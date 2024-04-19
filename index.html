@@ -9,7 +9,7 @@
     <h1>Реакция на букву 'a'</h1>
     <div id="volume">Громкость: ...</div>
     <div id="letter">Буква: ...</div>
-    <div class="">3</div>
+    <div class="">3+</div>
 
     <script>
       // Проверяем поддержку браузером
@@ -30,9 +30,10 @@
         const text = Array.from(e.results)
             .map((result) => result[0])
             .map((result) => result.transcript)
-            .join("");})
+            .join("");
 
-            document.getElementById('letter').textContent = 'Буква: ' + text;
+        document.getElementById('letter').textContent = 'Буква: ' + text;
+    })
 
     
 
