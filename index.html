@@ -44,6 +44,7 @@ recognition.start();
 recognition.onresult = function(event) {
 
   const last = event.results.length - 1;
+  document.getElementById('letter').textContent = last;
   
   const transcript = event.results[last][0].transcript.trim().toLowerCase();
 
