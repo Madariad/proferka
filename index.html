@@ -9,6 +9,7 @@
     <h1>Реакция на букву 'a'</h1>
     <div id="volume">Громкость: ...</div>
     <div id="letter">Буква: ...</div>
+    <div class="">1</div>
 
     <script>
       // Проверяем поддержку браузером
@@ -40,8 +41,10 @@ recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.start();
 
+console.log('sdd');
 // Обработчик результатов распознавания
 recognition.onresult = function(event) {
+    document.getElementById('letter').textContent = 'hhhhhh';
 
   const last = event.results.length - 1;
   document.getElementById('letter').textContent = last;
