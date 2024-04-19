@@ -9,7 +9,7 @@
     <h1>Реакция на букву 'a'</h1>
     <div id="volume">Громкость: ...</div>
     <div id="letter">Буква: ...</div>
-    <div class="">1</div>
+    <div class="">2</div>
 
     <script>
       // Проверяем поддержку браузером
@@ -17,49 +17,24 @@
         alert('Ваш браузер не поддерживает распознавание речи. Пожалуйста, используйте Google Chrome.');
       } else {
         // Создаем объект распознавания речи
-       // Объект с действиями для каждой буквы
-const actions = {
-  'a': function() {
-    // Действие для буквы 'a'
-    console.log('Буква "a" распознана');
-    document.getElementById('letter').textContent = 'Обнаружена буква: ';
-  },
-  // Добавьте другие буквы и соответствующие действия
-};
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.start();
 
-// Функция для выполнения действия на основе распознанной буквы
-function performAction(letter) {
-  if (actions[letter]) {
-    actionsletter; // Выполнение действия для буквы
-  }
-}
+        // Обработчик результатов распознавания
+        recognition.onresult = function(event) {
+          const last = event.results.length - 1;
+          const letter = event.results[last][0].transcript.trim().toLowerCase();
 
-// Настройка распознавания речи
-const recognition = new webkitSpeechRecognition();
-recognition.continuous = true;
-recognition.lang = 'en-US';
-recognition.interimResults = false;
-recognition.start();
+          document.getElementById('letter').textContent = 'Буква: ' + letter;
 
-console.log('sdd');
-// Обработчик результатов распознавания
-recognition.onresult = function(event) {
-    document.getElementById('letter').textContent = 'hhhhhh';
-
-  const last = event.results.length - 1;
-  document.getElementById('letter').textContent = last;
-  
-  const transcript = event.results[last][0].transcript.trim().toLowerCase();
-
-  // Проверяем каждую букву в распознанной фразе
-  for (let i = 0; i < transcript.length; i++) {
-    const letter = transcript[i];
-    performAction(letter); // Выполняем действие для каждой буквы
-  }
-};
-
-
-
+          // Проверяем, сказана ли буква 'a'
+          if (letter === 'a') {
+            document.getElementById('letter').textContent = 'Буква: ' + letter;
+          }
+        };
 
         // Запрашиваем доступ к микрофону
         navigator.mediaDevices.getUserMedia({ audio: true, video: false })
