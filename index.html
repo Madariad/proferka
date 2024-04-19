@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Audio Visualizer</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="audioCanvas" width="400" height="400"></canvas>
+
+    <script>
+        // Код для Microphone и визуализации
+        function Microphone(_fft) {
+            var FFT_SIZE = _fft || 1024;
+            this.spectrum = [];
+            this.volume = this.vol = 0;
+            this.peak_volume = 0;
+            var self = this;
+            var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            var SAMPLE_RATE = audioContext.sampleRate;
+
+            // Проверка поддержки браузером
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+            // Инициализация микрофона
+            function startMic(context) {
+                navigator.getUserMedia({ audio: true }, processSound, error);
+
+                function processSound(stream) {
+                    var analyser = context.createAnalyser();
+                    analyser.smoothingTimeConstant = 0.2;
+                    analyser.fftSize = FFT_SIZE;
+
+                    var node = context.createScriptProcessor(FFT_SIZE * 2, 1, 1);
+                    node.onaudioprocess = function() {
+                        self.spectrum = new Uint8Array(analyser.frequencyBinCount);
+                        analyser.getByteFrequencyData(self.spectrum);
+                        self.vol = self.getRMS(self.spectrum);
+                        if (self.vol > self.peak_volume) self.peak_volume = self.vol;
+                        self.volume = self.vol;
+                    };
+
+                    var input = context.createMediaStreamSource(stream);
+                    input.connect(analyser);
+                    analyser.connect(node);
+                    node.connect(context.destination);
+                }
+
+                function error() {
+                    console.error(arguments);
+                }
+            }
+
+            this.getRMS = function(spectrum) {
+                var rms = 0;
+                for (var i = 0; i < spectrum.length; i++) {
+                    rms += spectrum[i] * spectrum[i];
+                }
+                rms /= spectrum.length;
+                rms = Math.sqrt(rms);
+                return rms;
+            };
+
+            startMic(audioContext);
+        }
+
+        var Mic = new Microphone(2048);
+
+        // Визуализация
+        var canvas = document.getElementById('audioCanvas');
+        var ctx = canvas.getContext('2d');
+        var w = canvas.width;
+        var h = canvas.height;
+
+        function draw() {
+            requestAnimationFrame(draw);
+            var s = Mic.getRMS();
+            ctx.clearRect(0, 0, w, h); // Очистка холста
+            ctx.fillStyle = 'rgb(' + s * 2 + ', 50, 50)';
+            ctx.beginPath();
+            ctx.arc(w / 2, h / 2, s * 2, 0, Math.PI * 2, false);
+            ctx.fill();
+        }
+
+        draw();
+    </script>
+</body>
+</html>
