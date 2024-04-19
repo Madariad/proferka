@@ -29,6 +29,7 @@
 
   // Используем регулярное выражение для поиска буквы 'a'
   const regex = /a/;
+  document.getElementById('letter').textContent = 'Обнаружена буква: ' + transcript;
   if (regex.test(transcript)) {
     document.getElementById('letter').textContent = 'Обнаружена буква: ' + transcript;
   }
