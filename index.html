@@ -23,6 +23,8 @@
         recognition.interimResults = false;
         recognition.start();
 
+        document.getElementById('letter').textContent = 'Буква: ' + recognition.lang;
+
         // Обработчик результатов распознавания
         recognition.onresult = function(event) {
           const last = event.results.length - 1;
@@ -31,7 +33,7 @@
           document.getElementById('letter').textContent = 'Буква: ' + letter;
 
           // Проверяем, сказана ли буква 'a'
-          if (letter === 'a') {
+          if (letter === 'проверка') {
             document.getElementById('letter').textContent = 'Буква: ' + letter;
           }
         };
