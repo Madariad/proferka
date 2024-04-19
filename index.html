@@ -3,48 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Громкость звука</title>
+    <title>Реакция на букву 'a'</title>
 </head>
 <body>
-    <h1>Громкость звука</h1>
-    <div id="volume">...</div>
+    <h1>Реакция на букву 'a'</h1>
+    <div id="volume">Громкость: ...</div>
+    <div id="letter">Буква: ...</div>
 
     <script>
-      // Запрашиваем доступ к микрофону
-      navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-        .then((stream) => {
-          const audioContext = new AudioContext();
-          const analyser = audioContext.createAnalyser();
-          const microphone = audioContext.createMediaStreamSource(stream);
-          microphone.connect(analyser);
-          analyser.fftSize = 256;
-          const bufferLength = analyser.frequencyBinCount;
-          const dataArray = new Uint8Array(bufferLength);
+      // Проверяем поддержку браузером
+      if (!('webkitSpeechRecognition' in window)) {
+        alert('Ваш браузер не поддерживает распознавание речи. Пожалуйста, используйте Google Chrome.');
+      } else {
+        // Создаем объект распознавания речи
+        const recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.start();
 
-          // Функция для обновления громкости
-          function updateVolume() {
-            analyser.getByteFrequencyData(dataArray);
+        // Обработчик результатов распознавания
+        recognition.onresult = function(event) {
+          const last = event.results.length - 1;
+          const letter = event.results[last][0].transcript.trim().toLowerCase();
 
-            // Вычисляем среднюю громкость
-            let sum = 0;
-            for(let i = 0; i < bufferLength; i++) {
-              sum += dataArray[i];
-            }
-            let averageVolume = sum / bufferLength;
-
-            // Обновляем значение громкости на странице
-            document.getElementById('volume').textContent = 'Громкость: ' + averageVolume;
-
-            // Повторяем функцию каждые 100 миллисекунд
-            setTimeout(updateVolume, 100);
+          // Проверяем, сказана ли буква 'a'
+          if (letter === 'a') {
+            document.getElementById('letter').textContent = 'Буква: ' + letter;
           }
+        };
 
-          // Запускаем функцию обновления громкости
-          updateVolume();
-        })
-        .catch((error) => {
-          console.error('Ошибка при получении медиа-потока:', error);
-        });
+        // Запрашиваем доступ к микрофону
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+          .then((stream) => {
+            const audioContext = new AudioContext();
+            const analyser = audioContext.createAnalyser();
+            const microphone = audioContext.createMediaStreamSource(stream);
+            microphone.connect(analyser);
+            analyser.fftSize = 256;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            // Функция для обновления громкости
+            function updateVolume() {
+              analyser.getByteFrequencyData(dataArray);
+
+              // Вычисляем среднюю громкость
+              let sum = 0;
+              for(let i = 0; i < bufferLength; i++) {
+                sum += dataArray[i];
+              }
+              let averageVolume = sum / bufferLength;
+
+              // Обновляем значение громкости на странице
+              document.getElementById('volume').textContent = 'Громкость: ' + averageVolume;
+
+              // Повторяем функцию каждые 100 миллисекунд
+              setTimeout(updateVolume, 100);
+            }
+
+            // Запускаем функцию обновления громкости
+            updateVolume();
+          })
+          .catch((error) => {
+            console.error('Ошибка при получении медиа-потока:', error);
+          });
+      }
     </script>
 </body>
 </html>
