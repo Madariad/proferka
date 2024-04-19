@@ -28,6 +28,14 @@ analyser.getByteFrequencyData(dataArray);
 const averageVolume = dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length;
 console.log('Средняя громкость:', averageVolume);
 
+const p = document.createElement('p');
+
+// Set the text content of the paragraph
+p.textContent = averageVolume;
+
+// Append the paragraph to the body of the document
+document.body.appendChild(p);
+
   })
   .catch((error) => {
     console.error('Ошибка при получении медиа-потока:', error);
