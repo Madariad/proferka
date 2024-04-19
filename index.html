@@ -18,15 +18,14 @@
         const recognition = new SpeechRecognition();
         recognition.interimResults = true;
         console.log(recognition);
+        recognition.start();
 
 
         recognition.addEventListener("result", (e) => {
         
             console.log('sd');
-        const text = Array.from(e.results)
-            .map((result) => result[0])
-            .map((result) => result.transcript)
-            .join("");
+            const text = event.results[0][0].transcript;
+            
 
 
             document.getElementById('letter').textContent = 'Буква: ' + text;
@@ -38,7 +37,7 @@
         // recognition.start();
         // });
 
-        recognition.start();
+        
 
 
 
