@@ -9,31 +9,39 @@
     <h1>Реакция на букву 'a'</h1>
     <div id="volume">Громкость: ...</div>
     <div id="letter">Буква: ...</div>
-    <div class="">3+</div>
+    <div class="">4</div>
 
     <script>
-      // Проверяем поддержку браузером
-      if (!('webkitSpeechRecognition' in window)) {
-        alert('Ваш браузер не поддерживает распознавание речи. Пожалуйста, используйте Google Chrome.');
-      } else {
-        // Создаем объект распознавания речи
-        const recognition = new webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.start();
 
-        document.getElementById('letter').textContent = 'Буква: ' + recognition.lang;
+        window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        const recognition = new SpeechRecognition();
+        recognition.interimResults = true;
+        console.log(recognition);
+
 
         recognition.addEventListener("result", (e) => {
-  
+        
+            console.log('sd');
         const text = Array.from(e.results)
             .map((result) => result[0])
             .map((result) => result.transcript)
             .join("");
 
-        document.getElementById('letter').textContent = 'Буква: ' + text;
-    })
+
+            document.getElementById('letter').textContent = 'Буква: ' + text;
+
+        
+        });
+
+        // recognition.addEventListener("end", () => {
+        // recognition.start();
+        // });
+
+        recognition.start();
+
+
+
 
     
 
@@ -72,7 +80,8 @@
           .catch((error) => {
             console.error('Ошибка при получении медиа-потока:', error);
           });
-      }
+          
+      
     </script>
 </body>
 </html>
