@@ -9,7 +9,7 @@
     <h1>Реакция на букву 'a'</h1>
     <div id="volume">Громкость: ...</div>
     <div id="letter">Буква: ...</div>
-    <div class="">2</div>
+    <div class="">3</div>
 
     <script>
       // Проверяем поддержку браузером
@@ -25,18 +25,16 @@
 
         document.getElementById('letter').textContent = 'Буква: ' + recognition.lang;
 
-        // Обработчик результатов распознавания
-        recognition.onresult = function(event) {
-          const last = event.results.length - 1;
-          const letter = event.results[last][0].transcript.trim().toLowerCase();
+        recognition.addEventListener("result", (e) => {
+  
+        const text = Array.from(e.results)
+            .map((result) => result[0])
+            .map((result) => result.transcript)
+            .join("");})
 
-          document.getElementById('letter').textContent = 'Буква: ' + letter;
+            document.getElementById('letter').textContent = 'Буква: ' + text;
 
-          // Проверяем, сказана ли буква 'a'
-          if (letter === 'проверка') {
-            document.getElementById('letter').textContent = 'Буква: ' + letter;
-          }
-        };
+    
 
         // Запрашиваем доступ к микрофону
         navigator.mediaDevices.getUserMedia({ audio: true, video: false })
