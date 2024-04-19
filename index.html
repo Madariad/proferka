@@ -1,80 +1,31 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Audio Visualizer</title>
-    <style>
-        canvas {
-            border: 1px solid black;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
 </head>
 <body>
-    <canvas id="audioCanvas" width="400" height="400"></canvas>
+    <h1>as</h1>
 
-    <script>
-        // Код для Microphone и визуализации
-        function Microphone(_fft) {
-            var FFT_SIZE = _fft || 1024;
-            this.spectrum = new Uint8Array(FFT_SIZE/2);
-            this.volume = 0;
-            this.peak_volume = 0;
-            var audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            var analyser = audioContext.createAnalyser();
-            analyser.fftSize = FFT_SIZE;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/annyang/2.6.1/annyang.js" integrity="sha512-WzyURUvG8VnjyT/dMlUCHwuzJmbmNioOS0/kSMH3HDXmXzNLZoq2EVyTv3RDikwBBiBnBgpmDKRYsEg98cPYeA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-            // Проверка поддержки браузером и запрос доступа к микрофону
-            navigator.mediaDevices.getUserMedia({ audio: true }).then(processSound).catch(error);
+<script>
+  if (annyang) {
+    // Определяем команды
+    var commands = {
+      'а': function() { 
+        // Здесь код, который будет выполнен при распознавании слова "а"
+        document.body.style.backgroundColor = 'green'; // Пример изменения фона на зеленый
+      }
+    };
 
-            function processSound(stream) {
-                var source = audioContext.createMediaStreamSource(stream);
-                source.connect(analyser);
-                var processor = audioContext.createScriptProcessor(FFT_SIZE, 1, 1);
-                processor.onaudioprocess = function() {
-                    analyser.getByteFrequencyData(this.spectrum);
-                    this.volume = getRMS(this.spectrum);
-                    if (this.volume > this.peak_volume) this.peak_volume = this.volume;
-                }.bind(this);
-                analyser.connect(processor);
-                processor.connect(audioContext.destination);
-            }
+    // Добавляем команды к annyang
+    annyang.addCommands(commands);
 
-            function error(err) {
-                console.error("The following error occurred: " + err.name);
-            }
-
-            function getRMS(spectrum) {
-                var rms = 0;
-                for (var i = 0; i < spectrum.length; i++) {
-                    rms += spectrum[i] * spectrum[i];
-                }
-                rms /= spectrum.length;
-                rms = Math.sqrt(rms);
-                return rms;
-            }
-
-            this.getRMS = getRMS;
-        }
-
-        var Mic = new Microphone(2048);
-
-        // Визуализация
-        var canvas = document.getElementById('audioCanvas');
-        var ctx = canvas.getContext('2d');
-        var w = canvas.width;
-        var h = canvas.height;
-
-        function draw() {
-            requestAnimationFrame(draw);
-            var s = Mic.getRMS(Mic.spectrum);
-            ctx.clearRect(0, 0, w, h); // Очистка холста
-            ctx.fillStyle = 'rgb(' + s * 2 + ', 50, 50)';
-            ctx.beginPath();
-            ctx.arc(w / 2, h / 2, s * 2, 0, Math.PI * 2, false);
-            ctx.fill();
-        }
-
-        draw();
-    </script>
+    // Начинаем слушать
+    annyang.start();
+  }
+</script>
 </body>
 </html>
