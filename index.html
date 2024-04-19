@@ -21,6 +21,7 @@ const actions = {
   'a': function() {
     // Действие для буквы 'a'
     console.log('Буква "a" распознана');
+    document.getElementById('letter').textContent = 'Обнаружена буква: ';
   },
   // Добавьте другие буквы и соответствующие действия
 };
@@ -41,7 +42,9 @@ recognition.start();
 
 // Обработчик результатов распознавания
 recognition.onresult = function(event) {
+
   const last = event.results.length - 1;
+  
   const transcript = event.results[last][0].transcript.trim().toLowerCase();
 
   // Проверяем каждую букву в распознанной фразе
