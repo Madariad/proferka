@@ -16,47 +16,34 @@
         // Код для Microphone и визуализации
         function Microphone(_fft) {
             var FFT_SIZE = _fft || 1024;
-            this.spectrum = [];
-            this.volume = this.vol = 0;
+            this.spectrum = new Uint8Array(FFT_SIZE/2);
+            this.volume = 0;
             this.peak_volume = 0;
-            var self = this;
             var audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            var SAMPLE_RATE = audioContext.sampleRate;
+            var analyser = audioContext.createAnalyser();
+            analyser.fftSize = FFT_SIZE;
 
-            // Проверка поддержки браузером
-            window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            // Проверка поддержки браузером и запрос доступа к микрофону
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(processSound).catch(error);
 
-            // Инициализация микрофона
-            function startMic(context) {
-                navigator.getUserMedia({ audio: true }, processSound, error);
-
-                function processSound(stream) {
-                    var analyser = context.createAnalyser();
-                    analyser.smoothingTimeConstant = 0.2;
-                    analyser.fftSize = FFT_SIZE;
-
-                    var node = context.createScriptProcessor(FFT_SIZE * 2, 1, 1);
-                    node.onaudioprocess = function() {
-                        self.spectrum = new Uint8Array(analyser.frequencyBinCount);
-                        analyser.getByteFrequencyData(self.spectrum);
-                        self.vol = self.getRMS(self.spectrum);
-                        if (self.vol > self.peak_volume) self.peak_volume = self.vol;
-                        self.volume = self.vol;
-                    };
-
-                    var input = context.createMediaStreamSource(stream);
-                    input.connect(analyser);
-                    analyser.connect(node);
-                    node.connect(context.destination);
-                }
-
-                function error() {
-                    console.error(arguments);
-                }
+            function processSound(stream) {
+                var source = audioContext.createMediaStreamSource(stream);
+                source.connect(analyser);
+                var processor = audioContext.createScriptProcessor(FFT_SIZE, 1, 1);
+                processor.onaudioprocess = function() {
+                    analyser.getByteFrequencyData(this.spectrum);
+                    this.volume = getRMS(this.spectrum);
+                    if (this.volume > this.peak_volume) this.peak_volume = this.volume;
+                }.bind(this);
+                analyser.connect(processor);
+                processor.connect(audioContext.destination);
             }
 
-            this.getRMS = function(spectrum) {
+            function error(err) {
+                console.error("The following error occurred: " + err.name);
+            }
+
+            function getRMS(spectrum) {
                 var rms = 0;
                 for (var i = 0; i < spectrum.length; i++) {
                     rms += spectrum[i] * spectrum[i];
@@ -64,9 +51,9 @@
                 rms /= spectrum.length;
                 rms = Math.sqrt(rms);
                 return rms;
-            };
+            }
 
-            startMic(audioContext);
+            this.getRMS = getRMS;
         }
 
         var Mic = new Microphone(2048);
@@ -79,7 +66,7 @@
 
         function draw() {
             requestAnimationFrame(draw);
-            var s = Mic.getRMS();
+            var s = Mic.getRMS(Mic.spectrum);
             ctx.clearRect(0, 0, w, h); // Очистка холста
             ctx.fillStyle = 'rgb(' + s * 2 + ', 50, 50)';
             ctx.beginPath();
